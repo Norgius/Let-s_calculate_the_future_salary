@@ -50,7 +50,7 @@ def get_vacancies_from_hh(programming_languages):
     vacancies = {}
     for language in programming_languages:
         vacancies[language] = {}
-        vacancies_processed, all_wages, average_salary = 0, 0, 0
+        processed_vacancies, all_wages, average_salary = 0, 0, 0
         pages = 0
         per_page = 100
         for page_number in count(pages):
@@ -74,20 +74,20 @@ def get_vacancies_from_hh(programming_languages):
                 sys.stderr.write(f'{connect_er}\n\n')
                 sleep(15)
                 continue
-            vacancies_found = response.json().get('found')
+            total_vacancies = response.json().get('found')
             for vacancy in response.json().get('items'):
                 salary_from, salary_to = predict_rub_salary_hh(vacancy)
                 salary = predict_salary(salary_from, salary_to)
                 if salary:
                     all_wages += salary
-                    vacancies_processed += 1
+                    processed_vacancies += 1
             pages = response.json().get('pages')
             if page_number >= pages:
                 break
-        if all_wages and vacancies_processed:
-            average_salary = all_wages / vacancies_processed
-        vacancies[language] = {'vacancies_found': vacancies_found,
-                               'vacancies_processed': vacancies_processed,
+        if all_wages and processed_vacancies:
+            average_salary = all_wages / processed_vacancies
+        vacancies[language] = {'vacancies_found': total_vacancies,
+                               'vacancies_processed': processed_vacancies,
                                'average_salary': int(average_salary),
                                }
     return vacancies
@@ -100,7 +100,7 @@ def get_vacancies_from_superjob(programming_languages, api_key_superjob):
     vacancies = {}
     for language in programming_languages:
         vacancies[language] = {}
-        vacancies_processed, all_wages, average_salary = 0, 0, 0
+        processed_vacancies, all_wages, average_salary = 0, 0, 0
         pages = 0
         per_page = 100
         for page_number in count(pages):
@@ -122,20 +122,20 @@ def get_vacancies_from_superjob(programming_languages, api_key_superjob):
                 sys.stderr.write(f'{connect_er}\n\n')
                 sleep(15)
                 continue
-            vacancies_found = response.json().get('total')
+            total_vacancies = response.json().get('total')
             for vacancy in response.json()['objects']:
                 salary_from, salary_to = predict_rub_salary_sj(vacancy)
                 salary = predict_salary(salary_from, salary_to)
                 if salary:
                     all_wages += salary
-                    vacancies_processed += 1
-            pages = vacancies_found // per_page
+                    processed_vacancies += 1
+            pages = total_vacancies // per_page
             if page_number >= pages:
                 break
-        if all_wages and vacancies_processed:
-            average_salary = all_wages / vacancies_processed
-        vacancies[language] = {'vacancies_found': vacancies_found,
-                               'vacancies_processed': vacancies_processed,
+        if all_wages and processed_vacancies:
+            average_salary = all_wages / processed_vacancies
+        vacancies[language] = {'vacancies_found': total_vacancies,
+                               'vacancies_processed': processed_vacancies,
                                'average_salary': int(average_salary)
                                }
     return vacancies
