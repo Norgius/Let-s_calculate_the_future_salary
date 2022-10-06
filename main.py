@@ -152,24 +152,24 @@ def get_statistics_on_vacancies_from_sj(programming_languages, api_key_sj):
     return vacancies_statistics
 
 
-def create_output_table(vacancies, table_name):
+def create_output_table(vacancies_statistics, table_name):
     table_headers = ('Язык программирования', 'Вакансий найдено',
                      'Вакансий обработано', 'Средняя зарплата')
-    table = [[] for _ in range(len(vacancies) + 1)]
+    table = [[] for _ in range(len(vacancies_statistics) + 1)]
     table[0] = table_headers
-    for number, vacancy in enumerate(vacancies):
+    for number, vacancy in enumerate(vacancies_statistics):
         table[number + 1].append(vacancy)
         table[number + 1].append(
-            vacancies[vacancy].get('vacancies_found')
+            vacancies_statistics.get(vacancy).get('vacancies_found')
             )
         table[number + 1].append(
-            vacancies[vacancy].get('vacancies_processed')
+            vacancies_statistics.get(vacancy).get('vacancies_processed')
             )
         table[number + 1].append(
-            vacancies[vacancy].get('average_salary')
+            vacancies_statistics.get(vacancy).get('average_salary')
             )
-    table_output = AsciiTable(table, table_name)
-    return table_output.table
+    output_table = AsciiTable(table, table_name)
+    return output_table.table
 
 
 def main():
@@ -183,16 +183,17 @@ def main():
     api_key_sj = os.getenv('API_KEY_SJ')
     programming_languages = ('Python', 'Java', 'Javascript', 'Ruby',
                              'C#', 'C++', 'Go', 'Scala', 'PHP', 'Kotlin')
-    hh_vacancies_statistics = get_statistics_on_vacancies_from_hh(
+    vacancies_statistics_hh = get_statistics_on_vacancies_from_hh(
         programming_languages)
-    sj_vacancies_statistics = get_statistics_on_vacancies_from_sj(
+    vacancies_statistics_sj = get_statistics_on_vacancies_from_sj(
         programming_languages, api_key_sj)
-    table_names = ('HeadHunter Moscow', 'SuperJob Moscow')
-    table_output_hh = create_output_table(hh_vacancies_statistics,
-                                          table_names[0])
-    table_output_sj = create_output_table(sj_vacancies_statistics,
-                                          table_names[1])
-    print(table_output_hh, '\n\n', table_output_sj)
+    collected_statistics = {'HeadHunter Moscow': vacancies_statistics_hh,
+                            'SuperJob Moscow': vacancies_statistics_sj}
+    output_tables = []
+    for table_name, vacancies_statistics in collected_statistics.items():
+        output_tables.append(create_output_table(
+            vacancies_statistics, table_name))
+    print(*output_tables, sep='\n\n')
 
 
 if __name__ == '__main__':
