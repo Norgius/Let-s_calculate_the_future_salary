@@ -80,15 +80,15 @@ def get_statistics_on_vacancies_from_hh(programming_languages):
                 sys.stderr.write(f'{connect_er}\n\n')
                 sleep(15)
                 continue
-            json_response = response.json()
-            total_vacancies = json_response.get('found')
-            for vacancy in json_response.get('items'):
+            unpacked_response = response.json()
+            total_vacancies = unpacked_response.get('found')
+            for vacancy in unpacked_response.get('items'):
                 salary_from, salary_to = predict_rub_salary_hh(vacancy)
                 salary = predict_salary(salary_from, salary_to)
                 if salary:
                     all_wages += salary
                     processed_vacancies += 1
-            pages = json_response.get('pages')
+            pages = unpacked_response.get('pages')
             if page_number >= pages:
                 break
         if processed_vacancies:
@@ -131,9 +131,9 @@ def get_statistics_on_vacancies_from_sj(programming_languages, api_key_sj):
                 sys.stderr.write(f'{connect_er}\n\n')
                 sleep(15)
                 continue
-            json_response = response.json()
-            total_vacancies = json_response.get('total')
-            for vacancy in json_response.get('objects'):
+            unpacked_response = response.json()
+            total_vacancies = unpacked_response.get('total')
+            for vacancy in unpacked_response.get('objects'):
                 salary_from, salary_to = predict_rub_salary_sj(vacancy)
                 salary = predict_salary(salary_from, salary_to)
                 if salary:
@@ -157,15 +157,15 @@ def create_output_table(vacancies_statistics, table_name):
                      'Вакансий обработано', 'Средняя зарплата')
     table = [[] for _ in range(len(vacancies_statistics) + 1)]
     table[0] = table_headers
-    for number, vacancy in enumerate(vacancies_statistics):
-        table[number + 1].append(vacancy)
-        table[number + 1].append(
+    for number, vacancy in enumerate(vacancies_statistics, start=1):
+        table[number].append(vacancy)
+        table[number].append(
             vacancies_statistics.get(vacancy).get('vacancies_found')
             )
-        table[number + 1].append(
+        table[number].append(
             vacancies_statistics.get(vacancy).get('vacancies_processed')
             )
-        table[number + 1].append(
+        table[number].append(
             vacancies_statistics.get(vacancy).get('average_salary')
             )
     output_table = AsciiTable(table, table_name)
