@@ -11,6 +11,10 @@ from terminaltables import AsciiTable
 
 logger = logging.getLogger(__file__)
 HEADERS = {'User-Agent': 'My User Agent 1.0'}
+ID_VACANCY_DEVELOPER_HH = 1.221
+ID_VACANCY_DEVELOPER_SJ = 48
+ID_CITY_MOSCOW_HH = 1
+ID_CITY_MOSCOW_CJ = 4
 
 
 def predict_rub_salary_hh(vacancy):
@@ -48,15 +52,16 @@ def predict_salary(salary_from, salary_to):
 def get_statistics_on_vacancies_from_hh(programming_languages):
     logger.info('get_vacancies_from_hh() was called')
     url = 'https://api.hh.ru/vacancies'
-    vacancies = {}
+    vacancies_statistics = {}
     for language in programming_languages:
-        vacancies[language] = {}
+        vacancies_statistics[language] = {}
         processed_vacancies, all_wages, average_salary = 0, 0, 0
         pages = 0
         per_page = 100
         for page_number in count(pages):
             try:
-                params = {'text': language, 'area': 1, 'specialization': 1.221,
+                params = {'text': language, 'area': ID_CITY_MOSCOW_HH,
+                          'specialization': ID_VACANCY_DEVELOPER_HH,
                           'only_with_salary': 'true', 'page': page_number,
                           'per_page': per_page}
                 response = requests.get(url=url, params=params,
@@ -86,29 +91,31 @@ def get_statistics_on_vacancies_from_hh(programming_languages):
             pages = json_response.get('pages')
             if page_number >= pages:
                 break
-        if all_wages and processed_vacancies:
+        if processed_vacancies:
             average_salary = all_wages / processed_vacancies
-        vacancies[language] = {'vacancies_found': total_vacancies,
-                               'vacancies_processed': processed_vacancies,
-                               'average_salary': int(average_salary),
-                               }
-    return vacancies
+        vacancies_statistics[language] = {
+                            'vacancies_found': total_vacancies,
+                            'vacancies_processed': processed_vacancies,
+                            'average_salary': int(average_salary),
+        }
+    return vacancies_statistics
 
 
 def get_statistics_on_vacancies_from_sj(programming_languages, api_key_sj):
     logger.info('get_vacancies_from_superjob() was called')
     url = 'https://api.superjob.ru/2.0/vacancies/'
     headers = {'X-Api-App-Id': api_key_sj}
-    vacancies = {}
+    vacancies_statistics = {}
     for language in programming_languages:
-        vacancies[language] = {}
+        vacancies_statistics[language] = {}
         processed_vacancies, all_wages, average_salary = 0, 0, 0
         pages = 0
         per_page = 100
         for page_number in count(pages):
             try:
-                params = {'keyword': language, 'id_vacancy': 48,
-                          'town': 4, 'count': per_page, 'page': page_number}
+                params = {'keyword': language, 'town': ID_CITY_MOSCOW_CJ,
+                          'id_vacancy': ID_VACANCY_DEVELOPER_SJ,
+                          'count': per_page, 'page': page_number}
                 response = requests.get(url=url, headers=headers,
                                         params=params)
                 response.raise_for_status()
@@ -135,13 +142,14 @@ def get_statistics_on_vacancies_from_sj(programming_languages, api_key_sj):
             pages = total_vacancies // per_page
             if page_number >= pages:
                 break
-        if all_wages and processed_vacancies:
+        if processed_vacancies:
             average_salary = all_wages / processed_vacancies
-        vacancies[language] = {'vacancies_found': total_vacancies,
-                               'vacancies_processed': processed_vacancies,
-                               'average_salary': int(average_salary)
-                               }
-    return vacancies
+        vacancies_statistics[language] = {
+                            'vacancies_found': total_vacancies,
+                            'vacancies_processed': processed_vacancies,
+                            'average_salary': int(average_salary)
+        }
+    return vacancies_statistics
 
 
 def create_output_table(vacancies, table_name):
@@ -175,12 +183,15 @@ def main():
     api_key_sj = os.getenv('API_KEY_SJ')
     programming_languages = ('Python', 'Java', 'Javascript', 'Ruby',
                              'C#', 'C++', 'Go', 'Scala', 'PHP', 'Kotlin')
-    vacancies_hh = get_statistics_on_vacancies_from_hh(programming_languages)
-    vacancies_sj = get_statistics_on_vacancies_from_sj(
+    hh_vacancies_statistics = get_statistics_on_vacancies_from_hh(
+        programming_languages)
+    sj_vacancies_statistics = get_statistics_on_vacancies_from_sj(
         programming_languages, api_key_sj)
     table_names = ('HeadHunter Moscow', 'SuperJob Moscow')
-    table_output_hh = create_output_table(vacancies_hh, table_names[0])
-    table_output_sj = create_output_table(vacancies_sj, table_names[1])
+    table_output_hh = create_output_table(hh_vacancies_statistics,
+                                          table_names[0])
+    table_output_sj = create_output_table(sj_vacancies_statistics,
+                                          table_names[1])
     print(table_output_hh, '\n\n', table_output_sj)
 
 
