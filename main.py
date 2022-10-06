@@ -74,14 +74,15 @@ def get_statistics_on_vacancies_from_hh(programming_languages):
                 sys.stderr.write(f'{connect_er}\n\n')
                 sleep(15)
                 continue
-            total_vacancies = response.json().get('found')
-            for vacancy in response.json().get('items'):
+            json_response = response.json()
+            total_vacancies = json_response.get('found')
+            for vacancy in json_response.get('items'):
                 salary_from, salary_to = predict_rub_salary_hh(vacancy)
                 salary = predict_salary(salary_from, salary_to)
                 if salary:
                     all_wages += salary
                     processed_vacancies += 1
-            pages = response.json().get('pages')
+            pages = json_response.get('pages')
             if page_number >= pages:
                 break
         if all_wages and processed_vacancies:
@@ -122,8 +123,9 @@ def get_statistics_on_vacancies_from_sj(programming_languages, api_key_sj):
                 sys.stderr.write(f'{connect_er}\n\n')
                 sleep(15)
                 continue
-            total_vacancies = response.json().get('total')
-            for vacancy in response.json()['objects']:
+            json_response = response.json()
+            total_vacancies = json_response.get('total')
+            for vacancy in json_response.get('objects'):
                 salary_from, salary_to = predict_rub_salary_sj(vacancy)
                 salary = predict_salary(salary_from, salary_to)
                 if salary:
