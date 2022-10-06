@@ -15,21 +15,22 @@ HEADERS = {'User-Agent': 'My User Agent 1.0'}
 
 def predict_rub_salary_hh(vacancy):
     salary_from, salary_to = None, None
-    if vacancy.get('salary'):
-        salary = vacancy.get('salary')
-        if salary.get('currency') == 'RUR':
-            salary_from = salary.get('from')
-            salary_to = salary.get('to')
+    if not vacancy.get('salary'):
+        return salary_from, salary_to
+    salary = vacancy.get('salary')
+    if salary.get('currency') == 'RUR':
+        salary_from = salary.get('from')
+        salary_to = salary.get('to')
     return salary_from, salary_to
 
 
 def predict_rub_salary_sj(vacancy):
     salary_from, salary_to = None, None
-    if vacancy.get('currency'):
-        currency = vacancy.get('currency')
-        if currency == 'rub':
-            salary_from = vacancy.get('payment_from')
-            salary_to = vacancy.get('payment_to')
+    if not vacancy.get('currency'):
+        return salary_from, salary_to
+    if vacancy.get('currency') == 'rub':
+        salary_from = vacancy.get('payment_from')
+        salary_to = vacancy.get('payment_to')
     return salary_from, salary_to
 
 
