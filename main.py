@@ -44,7 +44,7 @@ def predict_salary(salary_from, salary_to):
     return salary
 
 
-def get_vacancies_from_hh(programming_languages):
+def get_statistics_on_vacancies_from_hh(programming_languages):
     logger.info('get_vacancies_from_hh() was called')
     url = 'https://api.hh.ru/vacancies'
     vacancies = {}
@@ -93,10 +93,10 @@ def get_vacancies_from_hh(programming_languages):
     return vacancies
 
 
-def get_vacancies_from_superjob(programming_languages, api_key_superjob):
+def get_statistics_on_vacancies_from_sj(programming_languages, api_key_sj):
     logger.info('get_vacancies_from_superjob() was called')
     url = 'https://api.superjob.ru/2.0/vacancies/'
-    headers = {'X-Api-App-Id': api_key_superjob}
+    headers = {'X-Api-App-Id': api_key_sj}
     vacancies = {}
     for language in programming_languages:
         vacancies[language] = {}
@@ -169,12 +169,12 @@ def main():
     handler = RotatingFileHandler('app.log', maxBytes=3000, backupCount=2)
     logger.addHandler(handler)
     load_dotenv()
-    api_key_superjob = os.getenv('API_KEY_SJ')
+    api_key_sj = os.getenv('API_KEY_SJ')
     programming_languages = ('Python', 'Java', 'Javascript', 'Ruby',
                              'C#', 'C++', 'Go', 'Scala', 'PHP', 'Kotlin')
-    vacancies_hh = get_vacancies_from_hh(programming_languages)
-    vacancies_sj = get_vacancies_from_superjob(
-        programming_languages, api_key_superjob)
+    vacancies_hh = get_statistics_on_vacancies_from_hh(programming_languages)
+    vacancies_sj = get_statistics_on_vacancies_from_sj(
+        programming_languages, api_key_sj)
     table_names = ('HeadHunter Moscow', 'SuperJob Moscow')
     table_output_hh = create_output_table(vacancies_hh, table_names[0])
     table_output_sj = create_output_table(vacancies_sj, table_names[1])
